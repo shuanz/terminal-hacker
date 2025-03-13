@@ -17,8 +17,13 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd backend/rust-core && wasm-pack build --target web"
+args = "cd frontend && npm run dev"
+
+[[workflows.workflow]]
+name = "Build Rust Core"
+author = 40463440
+mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd ../../frontend && npm install && npm run dev"
+args = "cd backend/rust-core && wasm-pack build --target web"
