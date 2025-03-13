@@ -18,6 +18,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: '0.0.0.0',
     fs: {
       allow: [
         '..',  // Allow parent directory access
@@ -31,6 +32,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
+    allowedHosts: 'all',
   },
   build: {
     outDir: 'dist',
