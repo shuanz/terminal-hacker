@@ -1,6 +1,6 @@
 import { GameState, CommandResult, Program, Target } from '../types';
 import { programs, targets } from '../data';
-import init, { scan_target, bruteforce_target } from 'terminal-hacker-core';
+import init, { scan_target, bruteforce_target } from '../../node_modules/terminal-hacker-core';
 import { AppDispatch } from '../store';
 import {
   addMessage,
@@ -197,7 +197,7 @@ Difficulty: ${'★'.repeat(target.difficulty)}
 Description: ${target.description}
 Reward: ${target.reward.xp} XP, $${target.reward.money}
 ----------------------------------------`).join('\n');
-      
+
       dispatch(addMessage({
         type: 'info',
         content: `=== Available Targets ===\n${targetsList}`,
@@ -216,16 +216,16 @@ Reward: ${target.reward.xp} XP, $${target.reward.money}
       try {
         const targetIp = args[0].toString();
         const module = await getWasmModule();
-        
+
         console.log('Scanning target:', targetIp);
         console.log('Module:', module);
-        
+
         const result = await scan_target(targetIp, module);
         dispatch(addMessage({
           type: 'success',
           content: `Scan results for ${targetIp}:\n${JSON.stringify(result, null, 2)}`,
         }));
-        
+
         if (result && typeof result === 'object') {
           if ('detection_level' in result) {
             dispatch(setDetection(result.detection_level));
