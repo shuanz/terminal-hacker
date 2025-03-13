@@ -17,7 +17,11 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd frontend && npm install && npm run dev -- --host"
+args = "cd backend/python-tools && python -m src.server &"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm install && npm run dev -- --host 0.0.0.0"
 
 [[workflows.workflow]]
 name = "Build Rust Core"
@@ -31,3 +35,7 @@ args = "cd backend/rust-core && wasm-pack build --target web"
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
