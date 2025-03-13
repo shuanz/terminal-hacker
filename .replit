@@ -21,7 +21,7 @@ args = "cd backend/python-tools && python -m src.server &"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd frontend && npm install && npm run dev -- --host 0.0.0.0"
+args = "cd frontend && npm run dev -- --host 0.0.0.0"
 
 [[workflows.workflow]]
 name = "Build Rust Core"
