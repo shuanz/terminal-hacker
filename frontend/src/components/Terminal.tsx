@@ -83,7 +83,18 @@ export const Terminal: React.FC<TerminalProps> = ({
 
     // Simple command processing example
     if (command.toLowerCase() === 'help') {
-      response = 'Available commands: help, clear, scan, connect, bruteforce, info';
+      response = `Available commands:
+- help     : Show this help message
+- clear    : Clear the terminal screen
+- scan     : Scan a target (usage: scan <target>)
+- connect  : Connect to a target (usage: connect <target>)
+- bruteforce: Attempt to crack a target's password (usage: bruteforce <target>)
+- info     : Display system information
+- targets  : List available targets
+- buy      : Purchase a program (usage: buy <program>)
+- upgrade  : Upgrade a program (usage: upgrade <program>)
+- ls       : List local files
+- cat      : Display file contents (usage: cat <filename>)`;
     } else if (command.toLowerCase() === 'clear') {
       setHistory([]);
       setInput('');
