@@ -1,6 +1,37 @@
 import { GameState, CommandResult, Program, Target } from '../types';
 import { programs, targets } from '../data';
-import init, { scan_target, bruteforce_target } from '../../node_modules/terminal-hacker-core';
+// Funções simuladas temporárias para substituir terminal-hacker-core
+const scan_target = async (target, wasmModule) => {
+  // Mock de resposta para simular a funcionalidade
+  return {
+    open_ports: [22, 80, 443],
+    os_info: "Linux 5.4.0",
+    vulnerabilities: [
+      { name: "CVE-2021-1234", severity: "high", description: "Remote code execution" }
+    ],
+    services: { "22": "SSH", "80": "HTTP", "443": "HTTPS" },
+    detection_level: 2,
+    experience_gained: 25,
+    scan_time: 1.5
+  };
+};
+
+const bruteforce_target = async (target, wasmModule) => {
+  // Mock de resposta para simular a funcionalidade
+  return {
+    success: true,
+    password: "********",
+    time_taken: 2.3,
+    experience_gained: 50,
+    money_gained: 100,
+    detection_level: 4
+  };
+};
+
+const getWasmModule = async () => {
+  // Mock de módulo WASM
+  return {};
+};
 import { AppDispatch } from '../store';
 import {
   addMessage,
@@ -12,7 +43,6 @@ import {
   setDetection,
   setStealthMode,
 } from '../features/terminalSlice';
-import { getWasmModule } from '../wasm/init';
 
 type CommandFunction = (...args: string[]) => Promise<CommandResult>;
 
