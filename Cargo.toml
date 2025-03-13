@@ -1,0 +1,10 @@
+
+[workspace]
+members = ["backend/rust-core"]
+default-member = "backend/rust-core"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
