@@ -1,339 +1,140 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store';
-import {
-  addMessage,
-  setInput,
-  clearInput,
-  addToHistory,
-  setHistoryIndex,
-  setProcessing,
-  setCurrentCommand,
-} from '../features/terminalSlice';
-import { processCommand } from '../utils/CommandProcessor';
-import { MatrixBackground } from './MatrixBackground';
-import { StatusBar } from './StatusBar';
+import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Terminal.css';
 
-export const Terminal: React.FC = () => {
-  const dispatch = useDispatch();
-  const terminalRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [isFocused, setIsFocused] = useState(false);
+interface TerminalProps {
+  initialCommands?: string[];
+}
 
-  const {
-    messages,
-    input,
-    history,
-    historyIndex,
-    isProcessing,
-    currentCommand,
-    level,
-    experience,
-    money,
-    detection,
-    isStealthMode,
-  } = useSelector((state: RootState) => state.terminal);
+export const Terminal: React.FC<TerminalProps> = ({ 
+  initialCommands = []
+}) => {
+  const [input, setInput] = useState<string>('');
+  const [history, setHistory] = useState<string[]>([]);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState<number>(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const terminalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Focus input when component mounts
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+
+    // Process any initial commands
+    initialCommands.forEach(cmd => {
+      processCommand(cmd);
+    });
+  }, []);
+
+  useEffect(() => {
+    // Scroll to bottom when history changes
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
-  }, [messages]);
-
-  useEffect(() => {
-    if (inputRef.current && isFocused) {
-      inputRef.current.focus();
-    }
-  }, [isFocused]);
+  }, [history]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setInput(e.target.value));
+    setInput(e.target.value);
   };
 
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && input.trim()) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
       e.preventDefault();
       const command = input.trim();
-      dispatch(addToHistory(command));
-      dispatch(clearInput());
-      dispatch(setHistoryIndex(-1));
-      dispatch(setProcessing(true));
-      dispatch(setCurrentCommand(command));
-
-      try {
-        await processCommand(command, dispatch);
-      } catch (error: unknown) {
-        dispatch(addMessage({
-          type: 'error',
-          content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        }));
-      } finally {
-        dispatch(setProcessing(false));
-        dispatch(setCurrentCommand(null));
+      if (command) {
+        processCommand(command);
       }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      if (historyIndex < history.length - 1) {
-        const newIndex = historyIndex + 1;
-        dispatch(setHistoryIndex(newIndex));
-        dispatch(setInput(history[history.length - 1 - newIndex]));
-      }
+      navigateHistory(-1);
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      if (historyIndex > 0) {
-        const newIndex = historyIndex - 1;
-        dispatch(setHistoryIndex(newIndex));
-        dispatch(setInput(history[history.length - 1 - newIndex]));
+      navigateHistory(1);
+    }
+  };
+
+  const navigateHistory = (direction: number) => {
+    if (commandHistory.length === 0) return;
+
+    const newIndex = historyIndex + direction;
+    if (newIndex >= -1 && newIndex < commandHistory.length) {
+      setHistoryIndex(newIndex);
+      if (newIndex === -1) {
+        setInput('');
       } else {
-        dispatch(setHistoryIndex(-1));
-        dispatch(clearInput());
+        setInput(commandHistory[newIndex]);
       }
+    }
+  };
+
+  const processCommand = (command: string) => {
+    setHistory(prev => [...prev, `> ${command}`]);
+
+    // Add to command history
+    setCommandHistory(prev => [command, ...prev]);
+    setHistoryIndex(-1);
+
+    // Process command logic
+    let response = '';
+
+    // Simple command processing example
+    if (command.toLowerCase() === 'help') {
+      response = 'Available commands: help, clear, scan, connect, bruteforce, info';
+    } else if (command.toLowerCase() === 'clear') {
+      setHistory([]);
+      setInput('');
+      return;
+    } else if (command.toLowerCase().startsWith('scan')) {
+      response = 'Scanning network...\nFound 3 potential targets:\n- 192.168.1.100 (Windows Server)\n- 192.168.1.101 (Linux)\n- 192.168.1.102 (Unknown OS)';
+    } else if (command.toLowerCase().startsWith('connect')) {
+      const target = command.split(' ')[1];
+      if (target) {
+        response = `Attempting to connect to ${target}...\nConnection established. Use 'help' for available commands.`;
+      } else {
+        response = 'Usage: connect <target_ip>';
+      }
+    } else if (command.toLowerCase().startsWith('bruteforce')){
+        response = 'Bruteforcing...';
+    } else if (command.toLowerCase().startsWith('info')){
+        response = 'System Info: \n OS: Ubuntu 22.04 \n Kernel: 5.15.0-76-generic \n Uptime: 3 days';
+    } else {
+      response = `Command not recognized: ${command}`;
+    }
+
+    setHistory(prev => [...prev, response]);
+    setInput('');
+  };
+
+  const handleClick = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
   };
 
   return (
-    <div className="app">
-      <MatrixBackground />
-      <StatusBar
-        level={level}
-        experience={experience}
-        money={money}
-        detection={detection}
-        isStealthMode={isStealthMode}
-      />
-      <div
-        className="terminal-container"
-        onClick={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-      >
-        <div className="terminal-output" ref={terminalRef}>
-          {messages.map((message, index) => (
-            <div key={index} className={`message ${message.type}`}>
-              {message.content}
-            </div>
-          ))}
-          {isProcessing && (
-            <div className="message info">
-              <span className="blink">Processing...</span>
-            </div>
-          )}
-        </div>
-        <div className="terminal-input">
-          <span className="prompt">$</span>
+    <div className="terminal" ref={terminalRef} onClick={handleClick}>
+      <div className="terminal-header">
+        <div className="terminal-title">Terminal Hacker v1.0</div>
+      </div>
+      <div className="terminal-content">
+        {history.map((line, index) => (
+          <div key={index} className="terminal-line">
+            {line}
+          </div>
+        ))}
+        <div className="terminal-input-line">
+          <span className="terminal-prompt">&gt;</span>
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Enter command..."
+            className="terminal-input"
             autoFocus
           />
         </div>
-      </div>
-    </div>
-  );
-}; 
-import React, { useState, useRef, useEffect } from 'react';
-import '../styles/Terminal.css';
-
-interface TerminalProps {
-  prompt?: string;
-  initialMessage?: string;
-}
-
-interface HistoryItem {
-  command: string;
-  output: string;
-}
-
-const Terminal: React.FC<TerminalProps> = ({ 
-  prompt = '>', 
-  initialMessage = "Terminal Hacker RPG v1.0.0\nType 'help' for available commands." 
-}) => {
-  const [input, setInput] = useState<string>('');
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [historyIndex, setHistoryIndex] = useState<number>(-1);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const terminalRef = useRef<HTMLDivElement>(null);
-
-  // Commands implementation
-  const commands: { [key: string]: (args: string[]) => string } = {
-    help: () => `
-Available commands:
-  help - Show this help message
-  scan <target> - Scan a target for vulnerabilities
-  bruteforce <target> - Attempt to bruteforce a target
-  stealth <on|off> - Toggle stealth mode
-  clear - Clear terminal output
-  status - Show current status
-    `,
-    clear: () => {
-      setHistory([]);
-      return '';
-    },
-    status: () => `
-Status:
-  Level: 1
-  Experience: 0/1000
-  Money: $1000
-  Detection: 0%
-  Stealth Mode: Off
-    `,
-    scan: (args) => {
-      if (args.length === 0) return 'Usage: scan <target>';
-      
-      const target = args[0];
-      return `
-Scanning target ${target}...
-Scan complete!
-
-Result:
-  OS: Ubuntu 20.04 LTS
-  Open ports: 22 (SSH), 80 (HTTP), 443 (HTTPS)
-  Vulnerabilities: 
-    - Weak SSH password (Risk: Medium)
-  Detection level: 20%
-      `;
-    },
-    bruteforce: (args) => {
-      if (args.length === 0) return 'Usage: bruteforce <target>';
-      
-      const target = args[0];
-      return `
-Bruteforcing target ${target}...
-Attempt successful!
-
-Result:
-  Password found: password123
-  Attempts: 128
-  Time elapsed: 3.5s
-  Method: Dictionary attack
-  Detection level: 40%
-      `;
-    },
-    stealth: (args) => {
-      if (args.length === 0 || (args[0] !== 'on' && args[0] !== 'off')) {
-        return 'Usage: stealth <on|off>';
-      }
-      
-      const mode = args[0];
-      return `Stealth mode ${mode === 'on' ? 'activated' : 'deactivated'}.`;
-    }
-  };
-
-  // Process command
-  const processCommand = (cmd: string) => {
-    const trimmedCmd = cmd.trim();
-    if (!trimmedCmd) return '';
-    
-    const parts = trimmedCmd.split(' ');
-    const command = parts[0].toLowerCase();
-    const args = parts.slice(1);
-    
-    if (commands[command]) {
-      return commands[command](args);
-    }
-    
-    return `Command not found: ${command}. Type 'help' for available commands.`;
-  };
-
-  // Handle command execution
-  const executeCommand = () => {
-    if (!input.trim()) return;
-    
-    const output = processCommand(input);
-    
-    setHistory([...history, { command: input, output }]);
-    setInput('');
-    setHistoryIndex(-1);
-  };
-
-  // Handle input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
-  };
-
-  // Handle key press
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      executeCommand();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (history.length > 0 && historyIndex < history.length - 1) {
-        const newIndex = historyIndex + 1;
-        setHistoryIndex(newIndex);
-        setInput(history[history.length - 1 - newIndex].command);
-      }
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (historyIndex > 0) {
-        const newIndex = historyIndex - 1;
-        setHistoryIndex(newIndex);
-        setInput(history[history.length - 1 - newIndex].command);
-      } else if (historyIndex === 0) {
-        setHistoryIndex(-1);
-        setInput('');
-      }
-    }
-  };
-
-  // Auto-focus input and scroll to bottom
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
-    }
-  }, [history]);
-
-  // Handle terminal click (focus on input)
-  const handleTerminalClick = () => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  return (
-    <div className="terminal" ref={terminalRef} onClick={handleTerminalClick}>
-      {initialMessage && (
-        <div className="terminal-initial-message">
-          {initialMessage.split('\n').map((line, i) => (
-            <div key={i}>{line}</div>
-          ))}
-        </div>
-      )}
-      
-      {history.map((item, index) => (
-        <div key={index} className="terminal-history-item">
-          <div className="terminal-command">
-            <span className="terminal-prompt">{prompt}</span> {item.command}
-          </div>
-          {item.output && (
-            <div className="terminal-output">
-              {item.output.split('\n').map((line, i) => (
-                <div key={i}>{line}</div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
-      
-      <div className="terminal-input-line">
-        <span className="terminal-prompt">{prompt}</span>
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          className="terminal-input"
-          spellCheck="false"
-          autoComplete="off"
-          autoCapitalize="off"
-        />
       </div>
     </div>
   );
