@@ -38,7 +38,7 @@ pub struct Program {
     success_rate: f32,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[wasm_bindgen]
 pub struct GameState {
     level: u32,
     experience: u32,
@@ -47,39 +47,203 @@ pub struct GameState {
     stealth_mode: bool,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct CommandResult {
-    success: bool,
-    message: Option<String>,
-    experience: Option<u32>,
-    money: Option<u32>,
-    detection: Option<u32>,
+#[wasm_bindgen]
+impl GameState {
+    pub fn new() -> Self {
+        Self {
+            level: 1,
+            experience: 0,
+            money: 1000,
+            detection: 0,
+            stealth_mode: false,
+        }
+    }
+
+    pub fn level(&self) -> u32 {
+        self.level
+    }
+
+    pub fn experience(&self) -> u32 {
+        self.experience
+    }
+
+    pub fn money(&self) -> u32 {
+        self.money
+    }
+
+    pub fn detection(&self) -> u32 {
+        self.detection
+    }
+
+    pub fn stealth_mode(&self) -> bool {
+        self.stealth_mode
+    }
+
+    pub fn add_experience(&mut self, amount: u32) -> bool {
+        self.experience += amount;
+
+        // Level up if experience exceeds 1000
+        if self.experience >= 1000 {
+            self.level += 1;
+            self.experience = 0;
+            return true;
+        }
+
+        false
+    }
+
+    pub fn add_money(&mut self, amount: u32) {
+        self.money += amount;
+    }
+
+    pub fn set_detection(&mut self, amount: u32) {
+        self.detection = if amount > 100 { 100 } else { amount };
+    }
+
+    pub fn toggle_stealth_mode(&mut self) {
+        self.stealth_mode = !self.stealth_mode;
+    }
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct ExecutionContext {
-    program: Program,
-    target: Target,
-    game_state: GameState,
-    args: Vec<String>,
+#[wasm_bindgen]
+pub struct Vulnerability {
+    name: String,
+    risk_level: u32,
+    description: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[wasm_bindgen]
+impl Vulnerability {
+    pub fn new(name: &str, risk_level: u32, description: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            risk_level,
+            description: description.to_string(),
+        }
+    }
+}
+
+#[wasm_bindgen]
 pub struct ScanResult {
     open_ports: Vec<u16>,
-    vulnerabilities: Vec<String>,
     os_info: String,
-    detection_chance: u32,
+    vulnerabilities: Vec<Vulnerability>,
+    services: HashMap<u16, String>,
+    detection_level: u32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[wasm_bindgen]
+impl ScanResult {
+    fn new(os_info: &str, detection_level: u32) -> Self {
+        Self {
+            open_ports: Vec::new(),
+            os_info: os_info.to_string(),
+            vulnerabilities: Vec::new(),
+            services: HashMap::new(),
+            detection_level,
+        }
+    }
+}
+
+#[wasm_bindgen]
 pub struct BruteforceResult {
     success: bool,
-    attempts: u32,
-    time_taken: f64,
     password: Option<String>,
-    detection_chance: u32,
+    attempts: u32,
+    time_elapsed: f64,
+    method_used: String,
+    detection_level: u32,
 }
+
+#[wasm_bindgen]
+impl BruteforceResult {
+    fn new(success: bool, password: Option<String>, attempts: u32, time_elapsed: f64, method_used: &str, detection_level: u32) -> Self {
+        Self {
+            success,
+            password,
+            attempts,
+            time_elapsed,
+            method_used: method_used.to_string(),
+            detection_level,
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub fn scan_target(target_ip: &str, stealth_mode: bool) -> ScanResult {
+    let detection_level = if stealth_mode { 5 } else { 20 };
+
+    // Simple implementation for demo purposes
+    // In a real game, this would be more complex with actual network scanning logic
+    let os_info = match target_ip {
+        "192.168.1.100" => "Ubuntu 20.04 LTS",
+        "10.0.0.50" => "Windows Server 2019",
+        "172.16.0.25" => "CentOS 8",
+        _ => "Unknown OS",
+    };
+
+    let mut result = ScanResult::new(os_info, detection_level);
+
+    // Add demo open ports based on target IP
+    match target_ip {
+        "192.168.1.100" => {
+            result.open_ports = vec![22, 80, 443];
+            result.services.insert(22, "ssh".to_string());
+            result.services.insert(80, "http".to_string());
+            result.services.insert(443, "https".to_string());
+            result.vulnerabilities.push(Vulnerability::new("weak_password", 2, "Weak SSH password"));
+        },
+        "10.0.0.50" => {
+            result.open_ports = vec![1433, 3306];
+            result.services.insert(1433, "mssql".to_string());
+            result.services.insert(3306, "mysql".to_string());
+            result.vulnerabilities.push(Vulnerability::new("sql_injection", 3, "SQL Injection vulnerability"));
+            result.vulnerabilities.push(Vulnerability::new("outdated_software", 2, "Outdated DBMS version"));
+        },
+        "172.16.0.25" => {
+            result.open_ports = vec![21, 2049];
+            result.services.insert(21, "ftp".to_string());
+            result.services.insert(2049, "nfs".to_string());
+            result.vulnerabilities.push(Vulnerability::new("misconfiguration", 2, "FTP anonymous access enabled"));
+            result.vulnerabilities.push(Vulnerability::new("default_credentials", 3, "Default admin credentials in use"));
+        },
+        _ => {}
+    }
+
+    result
+}
+
+#[wasm_bindgen]
+pub fn bruteforce_target(target_ip: &str, port: u16, stealth_mode: bool) -> BruteforceResult {
+    let detection_level = if stealth_mode { 15 } else { 40 };
+
+    // Simple implementation for demo purposes
+    // In a real game, this would be more complex
+    let success = match (target_ip, port) {
+        ("192.168.1.100", 22) => true,
+        ("10.0.0.50", 1433) => true,
+        ("172.16.0.25", 21) => true,
+        _ => false,
+    };
+
+    let password = if success {
+        match (target_ip, port) {
+            ("192.168.1.100", 22) => Some("password123".to_string()),
+            ("10.0.0.50", 1433) => Some("admin2019".to_string()),
+            ("172.16.0.25", 21) => Some("anonymous".to_string()),
+            _ => None,
+        }
+    } else {
+        None
+    };
+
+    let attempts = if success { 128 } else { 500 };
+    let time_elapsed = if success { 3.5 } else { 10.0 };
+    let method_used = if stealth_mode { "dictionary_attack" } else { "brute_force" };
+
+    BruteforceResult::new(success, password, attempts, time_elapsed, method_used, detection_level)
+}
+
 
 #[wasm_bindgen]
 pub fn execute_command(program_type: &str, context_json: &str) -> String {
@@ -105,45 +269,29 @@ pub fn execute_command(program_type: &str, context_json: &str) -> String {
 
 fn execute_scan(context: &ExecutionContext) -> CommandResult {
     let mut rng = rand::thread_rng();
-    let mut discovered = Vec::new();
-    let scan_success_rate = if context.game_state.stealth_mode { 0.7 } else { 0.9 };
     
+    let scan_success_rate = if context.game_state.stealth_mode() { 0.7 } else { 0.9 };
+
     // Scan for vulnerabilities
+    let mut discovered_vulnerabilities = Vec::new();
     for vuln in &context.target.vulnerabilities {
         if rng.gen::<f32>() < scan_success_rate {
-            discovered.push(vuln.clone());
+            discovered_vulnerabilities.push(vuln.clone());
         }
     }
-    
-    // Generate port scan results
-    let common_ports = vec![
-        "22/tcp (SSH)",
-        "80/tcp (HTTP)",
-        "443/tcp (HTTPS)",
-        "3306/tcp (MySQL)",
-        "5432/tcp (PostgreSQL)",
-        "8080/tcp (Proxy)",
-    ];
-    
-    let mut open_ports = Vec::new();
-    for port in common_ports {
-        if rng.gen::<f32>() > 0.3 {
-            open_ports.push(port.to_string());
-        }
-    }
-    
-    let mut new_detection = context.game_state.detection;
-    new_detection = std::cmp::min(
-        100,
-        new_detection + if context.game_state.stealth_mode { 5 } else { 10 }
-    );
-    
+
+    let scan_result = scan_target(&context.target.ip, context.game_state.stealth_mode());
+    let mut new_detection = context.game_state.detection();
+    new_detection = std::cmp::min(100, new_detection + scan_result.detection_level);
+
+
     CommandResult {
         success: true,
         message: Some(format!(
-            "Scan complete!\n\nDiscovered vulnerabilities:\n{}\n\nOpen ports:\n{}\n",
-            discovered.join("\n"),
-            open_ports.join("\n")
+            "Scan complete!\n\nDiscovered vulnerabilities:\n{}\n\nOpen ports:\n{}\nOS: {}\n",
+            discovered_vulnerabilities.iter().map(|v| v.to_string()).collect::<Vec<String>>().join("\n"),
+            scan_result.open_ports.iter().map(|p| p.to_string()).collect::<Vec<String>>().join("\n"),
+            scan_result.os_info
         )),
         experience: Some(50),
         money: None,
@@ -156,8 +304,8 @@ fn execute_bruteforce(context: &ExecutionContext) -> CommandResult {
     
     // Calculate success chance
     let base_chance = 0.7;
-    let level_bonus = (context.game_state.level as f32) * 0.05;
-    let stealth_penalty = if context.game_state.stealth_mode { -0.2 } else { 0.0 };
+    let level_bonus = (context.game_state.level() as f32) * 0.05;
+    let stealth_penalty = if context.game_state.stealth_mode() { -0.2 } else { 0.0 };
     let tool_bonus = if context.program.name.contains("Pro") { 0.2 } else { 0.0 };
     
     let success_chance = (base_chance + level_bonus + stealth_penalty + tool_bonus)
@@ -165,29 +313,14 @@ fn execute_bruteforce(context: &ExecutionContext) -> CommandResult {
     
     let success = rng.gen::<f32>() < success_chance;
     
-    let mut new_detection = context.game_state.detection;
-    new_detection = std::cmp::min(
-        100,
-        new_detection + if context.game_state.stealth_mode { 15 } else { 25 }
-    );
-    
-    // Generate random password if successful
-    let password = if success {
-        let chars: Vec<char> = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
-            .chars()
-            .collect();
-        let password: String = (0..12)
-            .map(|_| chars[rng.gen_range(0..chars.len())])
-            .collect();
-        Some(password)
-    } else {
-        None
-    };
-    
+    let bruteforce_result = bruteforce_target(&context.target.ip, 22, context.game_state.stealth_mode()); // Assuming port 22 for bruteforce
+    let mut new_detection = context.game_state.detection();
+    new_detection = std::cmp::min(100, new_detection + bruteforce_result.detection_level);
+
     CommandResult {
         success,
         message: Some(if success {
-            format!("Password cracked: {}", password.as_ref().unwrap())
+            format!("Password cracked: {}, Attempts: {}, Time: {:.2}, Method: {}", bruteforce_result.password.unwrap(), bruteforce_result.attempts, bruteforce_result.time_elapsed, bruteforce_result.method_used)
         } else {
             "Failed to crack password".to_string()
         }),
@@ -202,8 +335,8 @@ fn execute_firewall(context: &ExecutionContext) -> CommandResult {
     
     // Calculate bypass chance
     let base_chance = 0.6;
-    let level_bonus = (context.game_state.level as f32) * 0.05;
-    let stealth_bonus = if context.game_state.stealth_mode { 0.1 } else { 0.0 };
+    let level_bonus = (context.game_state.level() as f32) * 0.05;
+    let stealth_bonus = if context.game_state.stealth_mode() { 0.1 } else { 0.0 };
     let tool_bonus = if context.program.name.contains("Pro") { 0.2 } else { 0.0 };
     
     let bypass_chance = (base_chance + level_bonus + stealth_bonus + tool_bonus)
@@ -211,10 +344,10 @@ fn execute_firewall(context: &ExecutionContext) -> CommandResult {
     
     let success = rng.gen::<f32>() < bypass_chance;
     
-    let mut new_detection = context.game_state.detection;
+    let mut new_detection = context.game_state.detection();
     new_detection = std::cmp::min(
         100,
-        new_detection + if context.game_state.stealth_mode { 10 } else { 20 }
+        new_detection + if context.game_state.stealth_mode() { 10 } else { 20 }
     );
     
     CommandResult {
@@ -235,8 +368,8 @@ fn execute_crypto(context: &ExecutionContext) -> CommandResult {
     
     // Calculate decryption chance
     let base_chance = 0.5;
-    let level_bonus = (context.game_state.level as f32) * 0.05;
-    let stealth_penalty = if context.game_state.stealth_mode { -0.1 } else { 0.0 };
+    let level_bonus = (context.game_state.level() as f32) * 0.05;
+    let stealth_penalty = if context.game_state.stealth_mode() { -0.1 } else { 0.0 };
     let tool_bonus = if context.program.name.contains("Pro") { 0.3 } else { 0.0 };
     
     let decrypt_chance = (base_chance + level_bonus + stealth_penalty + tool_bonus)
@@ -244,10 +377,10 @@ fn execute_crypto(context: &ExecutionContext) -> CommandResult {
     
     let success = rng.gen::<f32>() < decrypt_chance;
     
-    let mut new_detection = context.game_state.detection;
+    let mut new_detection = context.game_state.detection();
     new_detection = std::cmp::min(
         100,
-        new_detection + if context.game_state.stealth_mode { 15 } else { 25 }
+        new_detection + if context.game_state.stealth_mode() { 15 } else { 25 }
     );
     
     CommandResult {
@@ -263,46 +396,21 @@ fn execute_crypto(context: &ExecutionContext) -> CommandResult {
     }
 }
 
-#[wasm_bindgen]
-pub fn scan_target(target: &str, stealth_mode: bool) -> JsValue {
-    let mut rng = rand::thread_rng();
-    
-    let result = ScanResult {
-        open_ports: vec![
-            rng.gen_range(20..100),
-            rng.gen_range(1000..5000),
-            rng.gen_range(5000..10000),
-        ],
-        vulnerabilities: vec![
-            "SQL Injection".to_string(),
-            "Weak Password".to_string(),
-            "Outdated Software".to_string(),
-        ],
-        os_info: "Linux 5.15.0-generic".to_string(),
-        detection_chance: if stealth_mode { 10 } else { 30 },
-    };
-
-    JsValue::from_serde(&result).unwrap()
+#[derive(Serialize, Deserialize)]
+pub struct CommandResult {
+    success: bool,
+    message: Option<String>,
+    experience: Option<u32>,
+    money: Option<u32>,
+    detection: Option<u32>,
 }
 
-#[wasm_bindgen]
-pub fn bruteforce_target(target: &str, stealth_mode: bool) -> JsValue {
-    let mut rng = rand::thread_rng();
-    let success = rng.gen_bool(0.7);
-    
-    let result = BruteforceResult {
-        success,
-        attempts: rng.gen_range(100..10000),
-        time_taken: rng.gen_range(0.5..5.0),
-        password: if success {
-            Some("P@ssw0rd123!".to_string())
-        } else {
-            None
-        },
-        detection_chance: if stealth_mode { 20 } else { 50 },
-    };
-
-    JsValue::from_serde(&result).unwrap()
+#[derive(Serialize, Deserialize)]
+pub struct ExecutionContext {
+    program: Program,
+    target: Target,
+    game_state: GameState,
+    args: Vec<String>,
 }
 
 #[cfg(test)]
@@ -311,32 +419,31 @@ mod tests {
 
     #[test]
     fn test_game_state() {
-        let state = GameState {
-            level: 1,
-            experience: 0,
-            money: 1000,
-            detection: 0,
-            stealth_mode: false,
-        };
-        assert_eq!(state.level, 1);
-        assert_eq!(state.experience, 0);
-        assert_eq!(state.money, 1000);
-        assert_eq!(state.detection, 0);
-        assert_eq!(state.stealth_mode, false);
+        let mut state = GameState::new();
+        assert_eq!(state.level(), 1);
+        assert_eq!(state.experience(), 0);
+        assert_eq!(state.money(), 1000);
+        assert_eq!(state.detection(), 0);
+        assert_eq!(state.stealth_mode(), false);
+        state.add_experience(1500);
+        assert_eq!(state.level(), 2);
+        assert_eq!(state.experience(), 0);
+        state.add_money(500);
+        assert_eq!(state.money(), 1500);
+        state.set_detection(110);
+        assert_eq!(state.detection(), 100);
+        state.toggle_stealth_mode();
+        assert!(state.stealth_mode());
+        state.toggle_stealth_mode();
+        assert!(!state.stealth_mode());
     }
 
     #[test]
     fn test_stealth_mode() {
-        let mut state = GameState {
-            level: 1,
-            experience: 0,
-            money: 1000,
-            detection: 0,
-            stealth_mode: false,
-        };
-        state.stealth_mode = true;
-        assert!(state.stealth_mode);
-        state.stealth_mode = false;
-        assert!(!state.stealth_mode);
+        let mut state = GameState::new();
+        state.toggle_stealth_mode();
+        assert!(state.stealth_mode());
+        state.toggle_stealth_mode();
+        assert!(!state.stealth_mode());
     }
-} 
+}

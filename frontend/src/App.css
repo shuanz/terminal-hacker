@@ -210,3 +210,21 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 } 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Courier New', monospace;
+  background-color: #000;
+  color: #0f0;
+  overflow: hidden;
+}
+
+.App {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}

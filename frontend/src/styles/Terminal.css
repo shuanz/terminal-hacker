@@ -174,3 +174,94 @@
   50% { opacity: 0.5; }
   100% { opacity: 1; }
 } 
+.terminal {
+  background-color: #000;
+  color: #0f0;
+  font-family: "Courier New", monospace;
+  padding: 16px;
+  border-radius: 4px;
+  width: 100%;
+  height: 500px;
+  overflow-y: auto;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  cursor: text;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.terminal::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+.terminal-initial-message {
+  margin-bottom: 16px;
+  color: #0f0;
+}
+
+.terminal-history-item {
+  margin-bottom: 8px;
+}
+
+.terminal-command {
+  display: flex;
+}
+
+.terminal-prompt {
+  color: #0f0;
+  margin-right: 8px;
+}
+
+.terminal-output {
+  color: #0f0;
+  opacity: 0.8;
+  margin-top: 4px;
+  margin-left: 16px;
+}
+
+.terminal-input-line {
+  display: flex;
+  align-items: center;
+}
+
+.terminal-input {
+  background: transparent;
+  border: none;
+  color: #0f0;
+  font-family: "Courier New", monospace;
+  font-size: inherit;
+  flex-grow: 1;
+  outline: none;
+  caret-color: #0f0;
+}
+
+/* Terminal animation effects */
+@keyframes textShadowPulse {
+  0% {
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+  }
+  100% {
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  }
+}
+
+.terminal {
+  animation: textShadowPulse 2s infinite;
+}
