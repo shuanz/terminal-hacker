@@ -1,3 +1,4 @@
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -32,7 +33,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
-    allowedHosts: 'all',
+    allowedHosts: ['ce4d57e3-f437-4569-b1bd-1c823ae1935b-00-ewfnnov8wpn5.riker.replit.dev', 'all'],
   },
   build: {
     outDir: 'dist',
@@ -41,4 +42,4 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['terminal-hacker-core']
   }
-}); 
+});
