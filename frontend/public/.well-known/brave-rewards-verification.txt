@@ -1,0 +1,4 @@
+This is a Brave Rewards publisher verification file.
+
+Domain: terminal-hacker.example.com
+Token: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 

@@ -1,0 +1,45 @@
+==================================================================
+https://keybase.io/terminal_hacker
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am terminal_hacker on github.
+  * I am terminal_hacker (https://keybase.io/terminal_hacker) on keybase.
+  * I have a public key AXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "host": "keybase.io",
+      "kid": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "uid": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "username": "terminal_hacker"
+    },
+    "merkle_root": {
+      "ctime": 1234567890,
+      "hash": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "hash_meta": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "seqno": 12345678
+    },
+    "service": {
+      "entropy": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "name": "github",
+      "username": "terminal_hacker"
+    },
+    "type": "web_service_binding",
+    "version": 2
+  },
+  "client": {
+    "name": "keybase.io go client",
+    "version": "X.X.X"
+  },
+  "ctime": 1234567890,
+  "expire_in": 504576000,
+  "prev": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "seqno": 12,
+  "tag": "signature"
+} 

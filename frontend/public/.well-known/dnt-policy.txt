@@ -1,0 +1,54 @@
+Do Not Track Compliance Policy
+
+Version 1.0
+
+This domain complies with user opt-outs from tracking via the "Do Not Track" or "DNT" header [http://www.w3.org/TR/tracking-dnt/]. This file will always be posted via HTTPS at https://terminal-hacker.example.com/.well-known/dnt-policy.txt to indicate this fact.
+
+SCOPE
+
+This policy document allows Terminal Hacker to declare that it respects Do Not Track as a meaningful privacy opt-out of tracking, by explaining how we comply with DNT for the version of the policy published at the domain.
+
+TRACKING DEFINITIONS
+
+"Tracking" means the collection of data regarding a particular user's activity across multiple distinct contexts and by multiple parties in a manner that can be correlated to a particular user, user agent, or device.
+
+"User" means a natural person, or a device that represents a natural person.
+
+"User agent" means any of the various client programs capable of accessing Web resources, including but not limited to browsers, spiders (web-based robots), command-line tools, native applications, and mobile apps.
+
+"Device" means a physical piece of equipment or a virtual machine instance used by a user or user agent to access the Web.
+
+"Context" means a set of resources that are controlled by the same party or jointly controlled by a set of parties.
+
+"Party" means an operator of a Web site or other resource, or a context.
+
+"First party" means the party that owns or exercises control over the Web site or other resource that the user agent is accessing.
+
+"Third party" means any party other than the first party or the user.
+
+"DNT" means the Do Not Track HTTP header field described in the W3C's Tracking Preference Expression draft: http://www.w3.org/TR/tracking-dnt/
+
+COMPLIANCE
+
+When we receive the DNT:1 header from any user, we will:
+
+1. Stop collecting data about that user that could be correlated with their activities across multiple distinct contexts and by multiple parties.
+2. Stop sharing data about that user with other parties, except those that are necessary for either:
+   a) Completing a first-party transaction
+   b) Providing a service explicitly requested by the user
+3. Stop using or transferring data about that user for any purpose other than those for which we received prior, explicit consent.
+4. Stop using or transferring data about that user's activities for any behavioral advertising or profiling purpose.
+
+EXCEPTIONS
+
+The only exceptions to this policy are:
+
+1. When we have received prior, explicit consent from the user to ignore the DNT signal
+2. When collection and sharing of data is necessary for security purposes
+3. When collection of data is necessary for basic site functionality
+4. When required by law
+
+CONTACT
+
+For any questions about this policy, please contact:
+privacy@terminal-hacker.example.com 

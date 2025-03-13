@@ -1,0 +1,19 @@
+{
+  "subject": "acct:terminal-hacker@terminal-hacker.example.com",
+  "aliases": [
+    "https://terminal-hacker.example.com/@terminal-hacker",
+    "https://terminal-hacker.example.com/users/terminal-hacker"
+  ],
+  "links": [
+    {
+      "rel": "http://webfinger.net/rel/profile-page",
+      "type": "text/html",
+      "href": "https://terminal-hacker.example.com/@terminal-hacker"
+    },
+    {
+      "rel": "self",
+      "type": "application/activity+json",
+      "href": "https://terminal-hacker.example.com/users/terminal-hacker"
+    }
+  ]
+} 

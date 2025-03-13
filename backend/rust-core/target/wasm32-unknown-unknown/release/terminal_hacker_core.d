@@ -1,0 +1,1 @@
+/Users/shuanzoleiron/Downloads/terminal-hacker/backend/rust-core/target/wasm32-unknown-unknown/release/terminal_hacker_core.wasm: /Users/shuanzoleiron/Downloads/terminal-hacker/backend/rust-core/src/lib.rs

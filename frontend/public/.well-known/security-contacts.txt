@@ -1,0 +1,23 @@
+# Security Contacts for Terminal Hacker
+
+Primary Contact:
+Email: security@terminal-hacker.example.com
+PGP Key: https://terminal-hacker.example.com/pgp-key.txt
+Response Time: Within 24 hours
+
+Secondary Contact:
+Email: security-backup@terminal-hacker.example.com
+PGP Key: https://terminal-hacker.example.com/backup-pgp-key.txt
+Response Time: Within 48 hours
+
+Emergency Contact:
+Phone: +1-XXX-XXX-XXXX (24/7 Security Hotline)
+Signal: +1-XXX-XXX-XXXX
+
+Reporting Guidelines:
+https://terminal-hacker.example.com/security/reporting-guidelines
+
+Bug Bounty Program:
+https://terminal-hacker.example.com/security/bug-bounty
+
+Last Updated: 2024-03-01 

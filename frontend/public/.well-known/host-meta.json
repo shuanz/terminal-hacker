@@ -1,0 +1,8 @@
+{
+  "links": [
+    {
+      "rel": "lrdd",
+      "template": "https://terminal-hacker.example.com/.well-known/webfinger?resource={uri}"
+    }
+  ]
+} 

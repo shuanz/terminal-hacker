@@ -1,0 +1,13 @@
+{
+  "@context": "https://www.w3.org/ns/did/v1",
+  "id": "did:web:terminal-hacker.example.com",
+  "verificationMethod": [{
+    "id": "did:web:terminal-hacker.example.com#key1",
+    "type": "Ed25519VerificationKey2018",
+    "controller": "did:web:terminal-hacker.example.com",
+    "publicKeyBase58": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  }],
+  "authentication": [
+    "did:web:terminal-hacker.example.com#key1"
+  ]
+} 

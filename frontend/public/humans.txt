@@ -1,0 +1,19 @@
+/* TEAM */
+	Developer: Terminal Hacker Team
+	Contact: team@terminal-hacker.example.com
+	Twitter: @terminal_hacker
+	From: Earth, Solar System
+
+/* THANKS */
+	Open Source Community
+	All Contributors
+
+/* SITE */
+	Last update: 2024/03/01
+	Language: English
+	Doctype: HTML5
+	IDE: VS Code, Cursor
+	Stack: React, TypeScript, Redux
+	Standards: HTML5, CSS3, ECMAScript 2022
+	Components: React, Redux, TypeScript
+	Software: Node.js, npm 

@@ -1,0 +1,10 @@
+/Users/shuanzoleiron/Downloads/terminal-hacker/backend/rust-core/target/wasm32-unknown-unknown/release/deps/libppv_lite86-b2a217a5d0302211.rmeta: /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/lib.rs /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/soft.rs /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/types.rs /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/generic.rs
+
+/Users/shuanzoleiron/Downloads/terminal-hacker/backend/rust-core/target/wasm32-unknown-unknown/release/deps/libppv_lite86-b2a217a5d0302211.rlib: /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/lib.rs /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/soft.rs /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/types.rs /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/generic.rs
+
+/Users/shuanzoleiron/Downloads/terminal-hacker/backend/rust-core/target/wasm32-unknown-unknown/release/deps/ppv_lite86-b2a217a5d0302211.d: /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/lib.rs /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/soft.rs /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/types.rs /Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/generic.rs
+
+/Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/lib.rs:
+/Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/soft.rs:
+/Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/types.rs:
+/Users/shuanzoleiron/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.21/src/generic.rs:
