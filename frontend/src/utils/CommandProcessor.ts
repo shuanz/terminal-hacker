@@ -1,521 +1,484 @@
+
 import { GameState, CommandResult, Program, Target } from '../types';
 import { programs, targets } from '../data';
-// Funções simuladas temporárias para substituir terminal-hacker-core
-const scan_target = async (target, wasmModule) => {
-  // Mock de resposta para simular a funcionalidade
-  return {
-    open_ports: [22, 80, 443],
-    os_info: "Linux 5.4.0",
-    vulnerabilities: [
-      { name: "CVE-2021-1234", severity: "high", description: "Remote code execution" }
-    ],
-    services: { "22": "SSH", "80": "HTTP", "443": "HTTPS" },
-    detection_level: 2,
-    experience_gained: 25,
-    scan_time: 1.5
-  };
-};
-
-const bruteforce_target = async (target, wasmModule) => {
-  // Mock de resposta para simular a funcionalidade
-  return {
-    success: true,
-    password: "********",
-    time_taken: 2.3,
-    experience_gained: 50,
-    money_gained: 100,
-    detection_level: 4
-  };
-};
-
-const getWasmModule = async () => {
-  // Mock de módulo WASM
-  return {};
-};
 import { AppDispatch } from '../store';
 import {
   addMessage,
-  setInput,
-  clearInput,
+  setCurrentTarget,
+  setPrograms,
+  setTargets,
+  setMoney,
   setLevel,
   setExperience,
-  setMoney,
+  setHealth,
   setDetection,
   setStealthMode,
 } from '../features/terminalSlice';
 
+// Simulações temporárias das funções que viriam do WebAssembly
+const mockScanResult = {
+  open_ports: [22, 80, 443],
+  os_info: "Linux 5.4.0",
+  vulnerabilities: [
+    { name: "CVE-2021-1234", severity: "high", description: "Remote code execution" }
+  ],
+  services: { "22": "SSH", "80": "HTTP", "443": "HTTPS" },
+  detection_level: 2,
+  experience_gained: 25,
+  scan_time: 1.5
+};
+
+const mockBruteforceResult = {
+  success: true,
+  password: "********",
+  time_taken: 2.3,
+  experience_gained: 50,
+  money_gained: 100,
+  detection_level: 4
+};
+
 type CommandFunction = (...args: string[]) => Promise<CommandResult>;
 
-interface Commands {
-  [key: string]: CommandFunction;
-}
+const createCommandMap = (
+  state: GameState,
+  dispatch: AppDispatch
+): Record<string, CommandFunction> => {
+  return {
+    help: async () => {
+      return {
+        success: true,
+        message: `Available commands:
+- help: Show this help message
+- scan <target>: Scan a target for vulnerabilities
+- connect <target>: Connect to a target
+- bruteforce <target>: Attempt to crack a target's password
+- ls: List available files
+- cat <file>: View file contents
+- stealth <on|off>: Toggle stealth mode
+- status: Show current status
+- targets: List known targets
+- programs: List available programs
+- upgrade <program>: Upgrade a program
+- buy <program>: Purchase a new program
+- clear: Clear the terminal`,
+      };
+    },
 
-const commands: Commands = {
-  help: async (): Promise<CommandResult> => {
-    return {
-      success: true,
-      message: `
+    clear: async () => {
+      return {
+        success: true,
+        clearTerminal: true,
+        message: '',
+      };
+    },
+
+    scan: async (targetId) => {
+      if (!targetId) {
+        return {
+          success: false,
+          message: 'Usage: scan <target>',
+        };
+      }
+
+      const target = state.targets.find(
+        (t) => t.id === targetId || t.ip === targetId
+      );
+
+      if (!target) {
+        return {
+          success: false,
+          message: `Target ${targetId} not found.`,
+        };
+      }
+
+      dispatch(addMessage(`Scanning ${target.ip} (${target.name})...`));
+      
+      // Simulação de espera para o scan
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      
+      const result = mockScanResult;
+      
+      let resultMessage = `Scan results for ${target.ip} (${target.name}):\n`;
+      resultMessage += `OS: ${result.os_info}\n`;
+      resultMessage += `Open ports: ${result.open_ports.join(', ')}\n`;
+      
+      if (result.vulnerabilities.length > 0) {
+        resultMessage += `\nVulnerabilities found:\n`;
+        result.vulnerabilities.forEach((vuln) => {
+          resultMessage += `- ${vuln.name} (${vuln.severity}): ${vuln.description}\n`;
+        });
+      }
+      
+      resultMessage += `\nServices:\n`;
+      for (const [port, service] of Object.entries(result.services)) {
+        resultMessage += `- Port ${port}: ${service}\n`;
+      }
+      
+      resultMessage += `\nScan completed in ${result.scan_time.toFixed(1)}s`;
+      resultMessage += `\nExperience gained: ${result.experience_gained}`;
+      
+      if (result.detection_level > 0) {
+        resultMessage += `\nDetection level increased by ${result.detection_level}`;
+        dispatch(setDetection(state.detection + result.detection_level));
+      }
+      
+      dispatch(setExperience(state.experience + result.experience_gained));
+
+      return {
+        success: true,
+        message: resultMessage,
+      };
+    },
+
+    bruteforce: async (targetId) => {
+      if (!targetId) {
+        return {
+          success: false,
+          message: 'Usage: bruteforce <target>',
+        };
+      }
+
+      const target = state.targets.find(
+        (t) => t.id === targetId || t.ip === targetId
+      );
+
+      if (!target) {
+        return {
+          success: false,
+          message: `Target ${targetId} not found.`,
+        };
+      }
+
+      dispatch(
+        addMessage(`Attempting to bruteforce ${target.ip} (${target.name})...`)
+      );
+      
+      // Simulação de espera para o bruteforce
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      
+      const result = mockBruteforceResult;
+      
+      let resultMessage = '';
+      
+      if (result.success) {
+        resultMessage += `Successfully cracked password for ${target.ip}!\n`;
+        resultMessage += `Password: ${result.password}\n`;
+        resultMessage += `Time taken: ${result.time_taken.toFixed(1)}s\n`;
+        resultMessage += `Money gained: $${result.money_gained}\n`;
+        resultMessage += `Experience gained: ${result.experience_gained}`;
+        
+        dispatch(setMoney(state.money + result.money_gained));
+        dispatch(setExperience(state.experience + result.experience_gained));
+      } else {
+        resultMessage += `Failed to crack password for ${target.ip}.\n`;
+        resultMessage += `Bruteforce protection detected.\n`;
+      }
+      
+      if (result.detection_level > 0) {
+        resultMessage += `\nDetection level increased by ${result.detection_level}`;
+        dispatch(setDetection(state.detection + result.detection_level));
+      }
+
+      return {
+        success: result.success,
+        message: resultMessage,
+      };
+    },
+
+    connect: async (targetId) => {
+      if (!targetId) {
+        return {
+          success: false,
+          message: 'Usage: connect <target>',
+        };
+      }
+
+      const target = state.targets.find(
+        (t) => t.id === targetId || t.ip === targetId
+      );
+
+      if (!target) {
+        return {
+          success: false,
+          message: `Target ${targetId} not found.`,
+        };
+      }
+
+      dispatch(addMessage(`Connecting to ${target.ip} (${target.name})...`));
+      dispatch(setCurrentTarget(target));
+
+      return {
+        success: true,
+        message: `Connected to ${target.ip} (${target.name}).\nType 'help' for available commands.`,
+      };
+    },
+
+    stealth: async (mode) => {
+      if (!mode || (mode !== 'on' && mode !== 'off')) {
+        return {
+          success: false,
+          message: 'Usage: stealth <on|off>',
+        };
+      }
+
+      const stealthMode = mode === 'on';
+      dispatch(setStealthMode(stealthMode));
+
+      return {
+        success: true,
+        message: `Stealth mode ${stealthMode ? 'enabled' : 'disabled'}.`,
+      };
+    },
+
+    status: async () => {
+      const levelProgress = Math.floor(
+        (state.experience / (state.level * 1000)) * 100
+      );
+      
+      return {
+        success: true,
+        message: `System Status:
+Level: ${state.level}
+Experience: ${state.experience}/${state.level * 1000} (${levelProgress}%)
+Money: $${state.money}
+Health: ${state.health}%
+Detection Level: ${state.detection}%
+Stealth Mode: ${state.stealthMode ? 'Enabled' : 'Disabled'}
+${state.currentTarget ? `Connected to: ${state.currentTarget.ip} (${state.currentTarget.name})` : 'Not connected to any target'}`,
+      };
+    },
+
+    targets: async () => {
+      if (state.targets.length === 0) {
+        return {
+          success: false,
+          message: 'No targets available.',
+        };
+      }
+
+      let message = 'Available targets:\n';
+      state.targets.forEach((target) => {
+        message += `- ${target.ip} (${target.name}): ${target.description}\n`;
+      });
+
+      return {
+        success: true,
+        message,
+      };
+    },
+
+    programs: async () => {
+      if (state.programs.length === 0) {
+        return {
+          success: false,
+          message: 'No programs available.',
+        };
+      }
+
+      let message = 'Available programs:\n';
+      state.programs.forEach((program) => {
+        message += `- ${program.name} (v${program.version}): ${program.description}\n`;
+        message += `  Cost: $${program.cost} | Upgrade: $${program.upgradeCost}\n`;
+      });
+
+      return {
+        success: true,
+        message,
+      };
+    },
+
+    upgrade: async (programId) => {
+      if (!programId) {
+        return {
+          success: false,
+          message: 'Usage: upgrade <program>',
+        };
+      }
+
+      const program = state.programs.find(
+        (p) => p.id === programId || p.name.toLowerCase() === programId.toLowerCase()
+      );
+
+      if (!program) {
+        return {
+          success: false,
+          message: `Program ${programId} not found.`,
+        };
+      }
+
+      if (state.money < program.upgradeCost) {
+        return {
+          success: false,
+          message: `Not enough money to upgrade ${program.name}. Need $${program.upgradeCost}.`,
+        };
+      }
+
+      const updatedProgram = {
+        ...program,
+        version: program.version + 0.1,
+        upgradeCost: Math.floor(program.upgradeCost * 1.5),
+      };
+
+      const updatedPrograms = state.programs.map((p) =>
+        p.id === program.id ? updatedProgram : p
+      );
+
+      dispatch(setPrograms(updatedPrograms));
+      dispatch(setMoney(state.money - program.upgradeCost));
+
+      return {
+        success: true,
+        message: `Upgraded ${program.name} to version ${updatedProgram.version.toFixed(1)}.`,
+      };
+    },
+
+    buy: async (programId) => {
+      if (!programId) {
+        return {
+          success: false,
+          message: 'Usage: buy <program>',
+        };
+      }
+
+      const program = programs.find(
+        (p) => p.id === programId || p.name.toLowerCase() === programId.toLowerCase()
+      );
+
+      if (!program) {
+        return {
+          success: false,
+          message: `Program ${programId} not found in store.`,
+        };
+      }
+
+      const alreadyOwned = state.programs.find((p) => p.id === program.id);
+      if (alreadyOwned) {
+        return {
+          success: false,
+          message: `You already own ${program.name}.`,
+        };
+      }
+
+      if (state.money < program.cost) {
+        return {
+          success: false,
+          message: `Not enough money to buy ${program.name}. Need $${program.cost}.`,
+        };
+      }
+
+      dispatch(setPrograms([...state.programs, program]));
+      dispatch(setMoney(state.money - program.cost));
+
+      return {
+        success: true,
+        message: `Purchased ${program.name} for $${program.cost}.`,
+      };
+    },
+
+    ls: async () => {
+      return {
+        success: true,
+        message: `Available files:
+- readme.txt
+- notes.txt
+- hacking_tools.sh
+- targets.db`,
+      };
+    },
+
+    cat: async (fileName) => {
+      if (!fileName) {
+        return {
+          success: false,
+          message: 'Usage: cat <file>',
+        };
+      }
+
+      let content;
+      switch (fileName.toLowerCase()) {
+        case 'readme.txt':
+          content = `TERMINAL HACKER v1.0
+
+Welcome to Terminal Hacker, a simulation of hacking activities in a terminal environment.
+
 Available commands:
-  help              - Show this help message
-  scan <ip>         - Scan a target IP address
-  bruteforce <url>  - Attempt to crack passwords
-  hack <target>     - Hack a target system
-  stealth           - Toggle stealth mode
-  status            - Show current status
-  clear             - Clear terminal
-      `.trim(),
-    };
-  },
+- help: Show all available commands
+- scan <target>: Scan a target for vulnerabilities
+- connect <target>: Connect to a target
+- bruteforce <target>: Attempt to crack a target's password
 
-  scan: async (ip: string): Promise<CommandResult> => {
-    try {
-      const response = await fetch('http://localhost:8000/scan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ target: ip }),
-      });
+Start by typing 'targets' to see available targets.`;
+          break;
+        case 'notes.txt':
+          content = `PERSONAL NOTES
 
-      if (!response.ok) {
-        throw new Error('Scan failed');
+Remember to always enable stealth mode before attempting any high-risk operations.
+The detection system can trigger countermeasures if it reaches 100%.
+
+Todo:
+- Upgrade scanning tools
+- Research new targets
+- Buy advanced password cracker`;
+          break;
+        case 'hacking_tools.sh':
+          content = `#!/bin/bash
+# This is a collection of hacking tools
+
+echo "Initializing hacking environment..."
+echo "This would be actual code in a real scenario."
+echo "Use the terminal commands instead of trying to run this file."`;
+          break;
+        case 'targets.db':
+          content = `DATABASE ENCRYPTED
+
+Access denied. This file requires higher privileges.
+Upgrade your security bypass program to access this content.`;
+          break;
+        default:
+          return {
+            success: false,
+            message: `File ${fileName} not found.`,
+          };
       }
 
-      const data = await response.json();
       return {
         success: true,
-        message: `Scan results for ${ip}:\n${JSON.stringify(data, null, 2)}`,
-        experience: 50,
-        detection: 10,
+        message: content,
       };
-    } catch (error: unknown) {
-      return {
-        success: false,
-        message: `Error scanning ${ip}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        detection: 20,
-      };
-    }
-  },
+    },
+  };
+};
 
-  bruteforce: async (url: string): Promise<CommandResult> => {
-    try {
-      const response = await fetch('http://localhost:8000/bruteforce', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ target: url }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Bruteforce failed');
-      }
-
-      const data = await response.json();
-      return {
-        success: true,
-        message: `Bruteforce results for ${url}:\n${JSON.stringify(data, null, 2)}`,
-        experience: 100,
-        money: 500,
-        detection: 30,
-      };
-    } catch (error: unknown) {
-      return {
-        success: false,
-        message: `Error bruteforcing ${url}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        detection: 40,
-      };
-    }
-  },
-
-  hack: async (target: string): Promise<CommandResult> => {
-    try {
-      // Simulate hacking process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      return {
-        success: true,
-        message: `Successfully hacked ${target}!`,
-        experience: 200,
-        money: 1000,
-        detection: 50,
-      };
-    } catch (error: unknown) {
-      return {
-        success: false,
-        message: `Error hacking ${target}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        detection: 60,
-      };
-    }
-  },
-
-  stealth: async (): Promise<CommandResult> => {
+export const processCommand = async (
+  input: string,
+  state: GameState,
+  dispatch: AppDispatch
+): Promise<CommandResult> => {
+  if (!input.trim()) {
     return {
-      success: true,
-      message: 'Stealth mode toggled',
-    };
-  },
-
-  status: async (): Promise<CommandResult> => {
-    return {
-      success: true,
-      message: `
-Current Status:
-  Level: 1
-  Experience: 0/1000
-  Money: $1000
-  Detection: 0%
-  Stealth Mode: Off
-      `.trim(),
-    };
-  },
-
-  clear: async (): Promise<CommandResult> => {
-    return {
-      success: true,
+      success: false,
       message: '',
     };
-  },
+  }
+
+  const parts = input.trim().split(' ');
+  const command = parts[0].toLowerCase();
+  const args = parts.slice(1);
+
+  const commandMap = createCommandMap(state, dispatch);
+
+  if (commandMap[command]) {
+    return await commandMap[command](...args);
+  }
+
+  return {
+    success: false,
+    message: `Command not recognized: ${command}. Type 'help' for available commands.`,
+  };
 };
 
-let wasmModule: any = null;
-
-export const initWasm = async () => {
-  if (!wasmModule) {
-    wasmModule = await getWasmModule();
-  }
-  return wasmModule;
+// Função mock simulando a inicialização do WASM
+export const initWasm = async (): Promise<void> => {
+  console.log("WebAssembly module mock initialized");
+  return Promise.resolve();
 };
-
-export const processCommand = async (command: string, dispatch: AppDispatch) => {
-  const tokens = command.toLowerCase().trim().split(/\s+/);
-  const cmd = tokens[0];
-  const args = tokens.slice(1);
-
-  if (!wasmModule) {
-    try {
-      await initWasm();
-    } catch (error) {
-      dispatch(addMessage({
-        type: 'error',
-        content: 'Failed to initialize WebAssembly module',
-      }));
-      return;
-    }
-  }
-
-  switch (cmd) {
-    case 'help':
-      dispatch(addMessage({
-        type: 'info',
-        content: `Available commands:
-  help - Show this help message
-  targets/list - List available targets
-  scan <target> - Scan a target for vulnerabilities
-  bruteforce <target> - Attempt to bruteforce a target
-  stealth <on|off> - Toggle stealth mode
-  clear - Clear terminal output
-  status - Show current status`,
-      }));
-      break;
-
-    case 'targets':
-    case 'list':
-      const targetsList = targets.map(target => `
-Name: ${target.name}
-IP: ${target.ip}
-Difficulty: ${'★'.repeat(target.difficulty)}
-Description: ${target.description}
-Reward: ${target.reward.xp} XP, $${target.reward.money}
-----------------------------------------`).join('\n');
-
-      dispatch(addMessage({
-        type: 'info',
-        content: `=== Available Targets ===\n${targetsList}`,
-      }));
-      break;
-
-    case 'scan':
-      if (args.length !== 1) {
-        dispatch(addMessage({
-          type: 'error',
-          content: 'Usage: scan <target>',
-        }));
-        return;
-      }
-
-      try {
-        const targetIp = args[0].toString();
-        const module = await getWasmModule();
-
-        console.log('Scanning target:', targetIp);
-        console.log('Module:', module);
-
-        const result = await scan_target(targetIp, module);
-        dispatch(addMessage({
-          type: 'success',
-          content: `Scan results for ${targetIp}:\n${JSON.stringify(result, null, 2)}`,
-        }));
-
-        if (result && typeof result === 'object') {
-          if ('detection_level' in result) {
-            dispatch(setDetection(result.detection_level));
-          }
-          if ('experience_gained' in result) {
-            dispatch(setExperience(result.experience_gained));
-          }
-        }
-      } catch (error) {
-        console.error('Scan error:', error);
-        dispatch(addMessage({
-          type: 'error',
-          content: `Failed to scan target: ${error instanceof Error ? error.message : String(error)}`,
-        }));
-      }
-      break;
-
-    case 'bruteforce':
-      if (args.length !== 1) {
-        dispatch(addMessage({
-          type: 'error',
-          content: 'Usage: bruteforce <target>',
-        }));
-        return;
-      }
-
-      try {
-        const result = await bruteforce_target(args[0], wasmModule);
-        dispatch(addMessage({
-          type: 'success',
-          content: `Bruteforce results for ${args[0]}:\n${JSON.stringify(result, null, 2)}`,
-        }));
-        dispatch(setDetection(result.detection_level));
-        dispatch(setMoney(result.money_gained));
-        dispatch(setExperience(result.experience_gained));
-      } catch (error) {
-        dispatch(addMessage({
-          type: 'error',
-          content: `Failed to bruteforce target: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        }));
-      }
-      break;
-
-    case 'stealth':
-      if (args.length !== 1 || !['on', 'off'].includes(args[0])) {
-        dispatch(addMessage({
-          type: 'error',
-          content: 'Usage: stealth <on|off>',
-        }));
-        return;
-      }
-
-      const isStealthMode = args[0] === 'on';
-      dispatch(setStealthMode(isStealthMode));
-      dispatch(addMessage({
-        type: 'info',
-        content: `Stealth mode ${isStealthMode ? 'enabled' : 'disabled'}`,
-      }));
-      break;
-
-    case 'clear':
-      dispatch(addMessage({
-        type: 'info',
-        content: 'Terminal cleared',
-      }));
-      break;
-
-    case 'status':
-      dispatch(addMessage({
-        type: 'info',
-        content: 'Current status: [Status information will be displayed here]',
-      }));
-      break;
-
-    default:
-      dispatch(addMessage({
-        type: 'error',
-        content: `Unknown command: ${cmd}. Type 'help' for available commands.`,
-      }));
-  }
-};
-
-export class CommandProcessor {
-  private async executeProgram(
-    programName: string,
-    args: string[],
-    gameState: GameState
-  ): Promise<CommandResult> {
-    const program = programs.find(p => p.name === programName);
-    if (!program) {
-      throw new Error(`Program ${programName} not found`);
-    }
-
-    if (!gameState.currentTarget) {
-      throw new Error('No target selected. Use attack [IP] first.');
-    }
-
-    // Create execution context
-    const context = {
-      program,
-      target: gameState.currentTarget,
-      gameState,
-      args
-    };
-
-    // Get WebAssembly module
-    const wasmModule = await getWasmModule();
-
-    // Execute program-specific logic using WebAssembly functions
-    switch (program.type) {
-      case 'scan':
-        const scanResult = await scan_target(context.target, wasmModule);
-        return {
-          success: true,
-          message: `Scan results:\n${JSON.stringify(scanResult, null, 2)}`,
-          experience: scanResult.experience_gained,
-          detection: scanResult.detection_level
-        };
-      case 'bruteforce':
-        const bruteforceResult = await bruteforce_target(context.target, wasmModule);
-        return {
-          success: bruteforceResult.success,
-          message: `Bruteforce results:\n${JSON.stringify(bruteforceResult, null, 2)}`,
-          experience: bruteforceResult.experience_gained,
-          money: bruteforceResult.money_gained,
-          detection: bruteforceResult.detection_level
-        };
-      default:
-        throw new Error(`Unsupported program type: ${program.type}`);
-    }
-  }
-
-  private showHelp(command?: string): CommandResult {
-    if (!command) {
-      return {
-        success: true,
-        output: `
-===== AVAILABLE COMMANDS =====
-
-help [command]    Show help for a specific command
-targets/list      List available targets
-attack [IP]       Start attack on specified IP
-scan              Analyze target's defense systems
-bruteforce        Attack authentication system
-bypass            Try to bypass firewall
-decrypt           Try to decrypt database
-shop/store        Show available programs
-buy [program]     Purchase a program
-inventory/inv     Show owned programs and tools
-run [program]     Execute a program
-stealth           Toggle stealth mode
-clear             Clear terminal
-exit              Exit current operation
-
-Use help [command] for detailed information about a command.
-`
-      };
-    }
-
-    // Add specific command help here
-    return { 
-      success: true,
-      output: `Help for command: ${command}` 
-    };
-  }
-
-  private showTargets(): CommandResult {
-    return {
-      success: true,
-      output: targets.map(target => `
-Name: ${target.name}
-IP: ${target.ip}
-Difficulty: ${'★'.repeat(target.difficulty)}
-Description: ${target.description}
-Reward: ${target.reward.xp} XP, $${target.reward.money}
-----------------------------------------
-`).join('\n')
-    };
-  }
-
-  private attackTarget(ip: string, gameState: GameState): CommandResult {
-    if (!ip) {
-      throw new Error('You must specify an IP to attack.');
-    }
-
-    const target = targets.find(t => t.ip === ip);
-    if (!target) {
-      throw new Error('Target IP not found.');
-    }
-
-    return {
-      success: true,
-      output: `
-Connecting to ${target.ip} (${target.name})...
-
-Connection established successfully.
-WARNING: Detection system active. Proceed with caution.
-
-Use scan command to analyze defense systems.
-`,
-      stateUpdate: {
-        currentTarget: target.ip,
-        detection: 0,
-        availablePrograms: [...gameState.availablePrograms]
-      }
-    };
-  }
-
-  private showStore(gameState: GameState): CommandResult {
-    return {
-      success: true,
-      output: `
-===== PROGRAM STORE =====
-
-${programs.map(program => `
-${program.name} - $${program.price} ${program.level <= gameState.playerLevel ? '[AVAILABLE]' : '[LOCKED]'}
-${program.description}
-Required level: ${program.level}
-Type: ${program.type}
-`).join('\n')}
-
-Use buy [program name] to purchase a program.
-`
-    };
-  }
-
-  private buyProgram(programName: string, gameState: GameState): CommandResult {
-    if (!programName) {
-      throw new Error('You must specify a program to buy.');
-    }
-
-    const program = programs.find(p => p.name === programName);
-    if (!program) {
-      throw new Error('Program not found in store.');
-    }
-
-    if (gameState.inventory.includes(program.name)) {
-      throw new Error('You already own this program.');
-    }
-
-    if (program.level > gameState.playerLevel) {
-      throw new Error(`Your level is too low. Required level: ${program.level}`);
-    }
-
-    if (program.price > gameState.playerMoney) {
-      throw new Error(`Not enough money. Price: $${program.price}`);
-    }
-
-    return {
-      success: true,
-      output: `Program ${programName} purchased successfully!
-Price: $${program.price}
-Type: ${program.type}
-Success Rate: ${program.successRate}%
-
-Use 'help ${programName}' for usage instructions.`,
-      stateUpdate: {
-        inventory: [...gameState.inventory, program.name],
-        playerMoney: gameState.playerMoney - program.price
-      }
-    };
-  }
-}
