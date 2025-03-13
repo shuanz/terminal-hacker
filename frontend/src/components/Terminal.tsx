@@ -5,6 +5,9 @@ interface TerminalProps {
   initialCommands?: string[];
 }
 
+// Removida definição duplicada do componente Terminal
+// A definição completa está mais abaixo no arquivo
+
 export const Terminal: React.FC<TerminalProps> = ({ 
   initialCommands = []
 }) => {
