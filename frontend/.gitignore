@@ -1,5 +1,6 @@
+
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -8,15 +9,15 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Dependencies
-node_modules
-dist
-dist-ssr
+node_modules/
+dist/
+dist-ssr/
 *.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
@@ -32,7 +33,13 @@ dist-ssr
 .env.production.local
 
 # Build artifacts
-build
-coverage
-.nyc_output
-*.tsbuildinfo 
+build/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+
+# WebAssembly
+*.wasm
+
+# Custom
+.history/
